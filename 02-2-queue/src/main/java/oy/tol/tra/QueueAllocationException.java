@@ -6,8 +6,8 @@ package oy.tol.tra;
 public class QueueAllocationException extends RuntimeException {
    /** Instantiate with a message. 
     * @param message The explanation for the exception.
-   */
+    */
    public QueueAllocationException(String message) {
       super(message);
-   }   
+   }
 }

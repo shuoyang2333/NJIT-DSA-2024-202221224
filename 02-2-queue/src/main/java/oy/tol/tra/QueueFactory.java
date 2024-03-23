@@ -2,7 +2,7 @@ package oy.tol.tra;
 
 /**
  * This class instantiates a queue implementing the {@code QueueInterface}.
- * 
+ *
  * @author Antti Juustila
  */
 public class QueueFactory {
@@ -20,7 +20,7 @@ public class QueueFactory {
       // - Instantiates your queue implementation using Integer as template parameter, 
       //   with the given capacity,
       // - and return the object to the caller.
-      
+      return new QueueImplementation<>(capacity);
    }
 
    /**

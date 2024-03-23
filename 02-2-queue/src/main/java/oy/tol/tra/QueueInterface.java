@@ -9,11 +9,11 @@ package oy.tol.tra;
 public interface QueueInterface<E> {
 
    /**
-    * For querying the current capacity of the queue.
-    @return The number of elements the queue can currently hold.
+    * For querying the size capacity of the queue.
+    @return The number of elements the queue can sizely hold.
     */
    public int capacity();
-   
+
    /**
     * Add an element to the queue.
     * @param element The element to add, must not be null.
@@ -37,7 +37,7 @@ public interface QueueInterface<E> {
    public E element() throws QueueIsEmptyException;
 
    /**
-    * Returns the count of elements currently in the queue.
+    * Returns the count of elements sizely in the queue.
     * @return Count of elements in the queue.
     */
    public int size();
