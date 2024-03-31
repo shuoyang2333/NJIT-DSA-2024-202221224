@@ -1,110 +1,140 @@
 package oy.tol.tra;
 
 public class QueueImplementation<E> implements QueueInterface<E> {
-
     private Object[] itemArray;
     private int capacity;
-    private int current = 0;
-    private int head = 0;
-    private int tail = -1;
-    private static final int DEFAULT_STACK_SIZE = 10;
+    private int head = 0; // 头指针
+    private int tail = 0; // 尾指针
+    private int size = 0; // 数组中的元素个数
 
-    public QueueImplementation() throws QueueAllocationException {
-        this(DEFAULT_STACK_SIZE);
+    public QueueImplementation() {
     }
 
-    public QueueImplementation(int capacity) throws QueueAllocationException {
-        if (capacity < 2) {
-            throw new QueueAllocationException("Capacity must be at least 2.");
-        }
-        this.capacity = capacity;
+    public QueueImplementation(int capacity) {
         this.itemArray = new Object[capacity];
+        this.capacity = capacity;
     }
 
-    @Override
+    /**
+     * For querying the current capacity of the queue.
+     *
+     * @return The number of elements the queue can currently hold.
+     */
     public int capacity() {
         return capacity;
     }
 
-    @Override
+    /**
+     * Add an element to the queue.
+     *
+     * @param element The element to add, must not be null.
+     * @throws QueueAllocationException If the reallocation for the queue failed in case queue needs reallocation.
+     * @throws NullPointerException     If the element is null.
+     */
     public void enqueue(E element) throws QueueAllocationException, NullPointerException {
-        ensureCapacity();
-        if (element == null) {
-            throw new NullPointerException();
+        if (size == capacity) {
+            checkAndGrow();
         }
-        tail = (tail + 1) % capacity;
+
+        if (element == null) {
+            throw new NullPointerException("Element cannot be null!");
+        }
         itemArray[tail] = element;
-        current++;
+        tail = (tail + 1) % itemArray.length;
+        size++;
     }
 
+    /**
+     * Removes an element from the queue.
+     *
+     * @return The element from the head of the queue.
+     * @throws QueueIsEmptyException If the queue is empty.
+     */
     @Override
     public E dequeue() throws QueueIsEmptyException {
         if (isEmpty()) {
-            throw new QueueIsEmptyException("Cannot dequeue from an empty queue.");
+            throw new QueueIsEmptyException("Queue is empty!");
         }
-        E returnE = element();
-        head = (head + 1) % capacity;
-        current--;
-        return returnE;
+        E element = (E) itemArray[head];
+        itemArray[head] = null; // clear the reference to the dequeued element
+        head = (head + 1) % itemArray.length;
+        size--;
+        return element;
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Returns the element at the head of the queue, not removing it from the queue.
+     *
+     * @return The element in the head of the queue.
+     * @throws QueueIsEmptyException If the queue is empty.
+     */
     @Override
     public E element() throws QueueIsEmptyException {
         if (isEmpty()) {
-            throw new QueueIsEmptyException("Cannot dequeue from an empty queue.");
+            throw new QueueIsEmptyException("Queue is empty!");
         }
-        return (E) itemArray[head];
+        E element = (E) itemArray[head];
+        return element;
     }
 
+    /**
+     * Returns the count of elements currently in the queue.
+     *
+     * @return Count of elements in the queue.
+     */
     @Override
     public int size() {
-        return current;
+        return size;
     }
 
+    /**
+     * Can be used to check if the queue is empty.
+     *
+     * @return True if the queue is empty, false otherwise.
+     */
     @Override
     public boolean isEmpty() {
-        return current == 0;
+        return size == 0;
     }
 
+    /**
+     * Resets the queue to empty state, removing the objects.
+     */
     @Override
     public void clear() {
-        head = 0;
-        tail = -1;
-        current = 0;
+        // Clearing references to elements
+        for (int i = 0; i < size; i++) {
+            itemArray[(head + i) % itemArray.length] = null;
+        }
+        head = tail = size = 0; // Reset pointers and size
+    }
+
+    private void checkAndGrow() {
+        int newCapacity = capacity + (capacity >> 1); // Increase capacity by 50%
+        Object[] newArray = new Object[newCapacity];
+        for (int i = 0; i < size; i++) {
+            newArray[i] = itemArray[(head + i) % itemArray.length];
+        }
+        itemArray = newArray;
+        capacity = newCapacity; // Update capacity
+        head = 0; // Reset head pointer as items are shifted to the beginning of the new array
+        tail = size; // Update tail pointer to the end of the new array
     }
 
     @Override
     public String toString() {
+        if (isEmpty()) {
+            return "[]";
+        }
         StringBuilder builder = new StringBuilder("[");
-        int index = head;
-        int loopTime = current;
-        while (loopTime-- > 0) {
-            builder.append(itemArray[index].toString());
-            index = (index + 1) % capacity;
-            if (loopTime != 0) {
+        for (int i = 0; i < size; i++) {
+            builder.append(itemArray[(head + i) % itemArray.length].toString());
+            if (i < size - 1) {
                 builder.append(", ");
             }
         }
         builder.append("]");
         return builder.toString();
     }
-
-    private void ensureCapacity() {
-        if (current == capacity) {
-            int newCapacity = capacity * 2 + 1;
-            Object[] newArray = new Object[newCapacity];
-            int indexOfItemArray = head;
-            int index = 0;
-            int loop = current;
-            while (loop-- > 0) {
-                newArray[index++] = itemArray[indexOfItemArray];
-                indexOfItemArray = (indexOfItemArray + 1) % capacity;
-            }
-            head = 0;
-            tail = index - 1;
-            itemArray = newArray;
-            capacity = newCapacity;
-        }
-    }
 }
+
